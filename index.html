@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Product's Edge — where Euler's product over the primes stops, and why that edge is the Riemann Hypothesis</title>
+<meta name="description" content="Euler's product over all primes builds the zeta function wherever there are no zeros — and stops exactly at the edge of the zero-free region. Three live panels: the product converging at s = 2, swinging without limit on the critical line at a zero, and the pole-compensated series whose convergence to the right of the line is the Riemann Hypothesis itself. Everything computed in your browser from a prime sieve to one million.">
+<meta property="og:title" content="The Product's Edge">
+<meta property="og:description" content="Where Euler's product over the primes stops. Instruments, not proofs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0e14;--panel:#111725;--panel-2:#0e1420;--line:#1e293b;--text:#e6edf3;--dim:#9fb0c3;--faint:#6b7a8c;--accent:#7dd3fc;--gold:#e8c47a;--red:#ff5c5c;--green:#6fdc9a;--violet:#b58cf5;--orange:#f7a03a}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.55}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:1060px;margin:0 auto;padding:28px 16px 64px}
+  .eyebrow{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,6vw,3.2rem);margin:0 0 8px;line-height:1.1}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.35rem;margin:0 0 10px}
+  .sub{color:var(--dim);font-size:clamp(.98rem,2.4vw,1.06rem);max-width:76ch;margin:0 0 8px}
+  .creed{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--faint);margin:0}
+  .creed b{color:var(--dim);font-weight:500}
+  section{margin-top:30px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .card p{margin:0 0 10px;color:var(--dim);font-size:.95rem} .card p:last-child{margin:0} .card b{color:var(--text)}
+  canvas{width:100%;height:auto;display:block;border-radius:10px;background:var(--panel-2)}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 6px;font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--dim)}
+  .row button{background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;cursor:pointer;min-height:40px}
+  .row button.on{border-color:var(--gold);color:var(--gold)}
+  .readout{font-family:'IBM Plex Mono',monospace;font-size:.82rem;color:var(--dim);margin-top:8px}
+  .readout b{color:var(--gold)}
+  .thm{border-left:4px solid var(--red);background:rgba(255,92,92,.07)}
+  .thm .big{font-family:'Fraunces',serif;font-size:1.15rem;color:var(--text);margin:0 0 8px}
+  .receipts table{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:.78rem}
+  .receipts td,.receipts th{padding:7px 8px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+  .receipts th{color:var(--faint);font-weight:500;letter-spacing:.06em;text-transform:uppercase;font-size:.68rem}
+  .pass{color:var(--green)} .fail{color:var(--red)}
+  #selfcheck{font-family:'IBM Plex Mono',monospace;font-size:.85rem;margin-top:10px}
+  .sources ul{margin:0;padding-left:18px;color:var(--dim);font-size:.9rem} .sources li{margin:4px 0}
+  footer{margin-top:40px;color:var(--faint);font-size:.85rem;border-top:1px solid var(--line);padding-top:14px;line-height:1.6}
+  .lg{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:baseline}
+  .status{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--faint)}
+</style>
+</head>
+<body><div class="wrap">
+
+<header>
+  <div class="eyebrow">Room VIII · Where the Product Stops</div>
+  <h1>The Product's Edge</h1>
+  <p class="sub">Euler's product <b>ζ(s) = ∏ₚ (1 − p^{−s})⁻¹</b> builds the zeta function from the primes — but only where there are no zeros. Where it converges it proves the zeros away; where the zeros live it never settles. Three live panels, all computed here from a prime sieve to one million: <b>where the product converges</b>, <b>where it swings</b>, and <b>the compensated series whose convergence to the right of the line is the Riemann Hypothesis itself</b>.</p>
+  <p class="creed"><b>Instruments, not proofs.</b> Every curve is a finite window. Finite windows can refute and never prove. Nothing on this page bears on the truth of the Riemann Hypothesis.</p>
+  <p class="status" id="status">computing — sieving to one million…</p>
+</header>
+
+<section>
+  <h2>1 · Where the product converges: s = 2</h2>
+  <div class="card">
+    <canvas id="c1" width="900" height="360" aria-label="log10 of the error of the finite Euler product at s = 2 against log10 of the prime cutoff"></canvas>
+    <div class="readout" id="r1"></div>
+    <p style="margin-top:10px">For Re s &gt; 1 the product converges absolutely and is never zero: a convergent product of nonzero factors is nonzero. That is the product's one theorem about zeros — <b>there are none where it converges</b> — and it proves it completely. Here the finite products over primes ≤ X close on ζ(2) = π²/6 like clockwork.</p>
+  </div>
+</section>
+
+<section>
+  <h2>2 · Where the product swings: the critical line</h2>
+  <div class="card">
+    <div class="row" id="pick"></div>
+    <canvas id="c2" width="900" height="380" aria-label="log of the modulus of the finite Euler product on the critical line against log10 of the prime cutoff, with the rotating main term"></canvas>
+    <div class="readout" id="r2"></div>
+    <p style="margin-top:10px">At a zero ρ = ½ + iγ the true value is <b>ζ(ρ) = 0</b> — computed independently here from the alternating series, not from any table. The finite products over primes ≤ X do not approach it: <b>they never converge and never stop</b>. Their logarithm carries the prime sum's rotating main term Re[X^{1−s}/((1−s)·log X)], of size √X/(|1−s|·log X) (dashed): the swing follows its sign, with a slowly varying offset from the zero-side terms. The same happens at a height that is not a zero (the t = 15 control, where |ζ| = 0.72): the swing is about the strip, not about the zero. <b>No finite product has a zero; the infinite one does not exist here as a product.</b></p>
+  </div>
+</section>
+
+<section>
+  <h2>3 · The compensated series — the edge itself</h2>
+  <div class="card">
+    <canvas id="c3" width="900" height="380" aria-label="partial sums of the pole-compensated series against log10 x for five real values of s"></canvas>
+    <div class="readout" id="r3"></div>
+    <p style="margin-top:10px">Remove the pole and the product becomes an honest Dirichlet series: <b>Σ (Λ(n) − 1)·n^{−s}</b> — the primes minus the integers, where Λ(n) = log p if n is a power of the prime p and 0 otherwise. Its partial sums settle to the right of the line (s = 0.9, 0.75, 0.6) and wander at and left of it (s = 0.5, 0.4). This picture is a finite window: it illustrates the theorem below, it does not test it.</p>
+  </div>
+  <div class="card thm" style="margin-top:12px">
+    <p class="big">Theorem (classical). The abscissa of convergence of Σ (Λ(n) − 1)·n^{−s} is exactly Θ, the supremum of the real parts of the zeros of ζ. Hence <b>the Riemann Hypothesis holds if and only if this series converges for every s with Re s &gt; ½.</b></p>
+    <p><b>Why (⟹):</b> under the hypothesis, ψ(x) − x = O(√x·log² x) (von Koch), and Σ_{n≤x}(Λ(n) − 1) = ψ(x) − x + O(1); partial summation then gives convergence for Re s &gt; ½.</p>
+    <p><b>Why (⟸):</b> a Dirichlet series that converges at one point converges, and is analytic, in the open half-plane to its right. This series equals −ζ′(s)/ζ(s) − ζ(s) for Re s &gt; 1, so convergence on Re s &gt; ½ continues −ζ′/ζ analytically there: no zeros with Re s &gt; ½ — and none with Re s &lt; ½, by the functional equation's mirror.</p>
+    <p><b>So the edge of the product's convergence <em>is</em> the rightmost zero.</b> "Build the Euler product over all primes to the right of the line" is not a step toward the Riemann Hypothesis — it is the Riemann Hypothesis. Same species as "boundedness of the truncated Weil form alone is RH" (von Koch): the circularity lint at maximum precision.</p>
+  </div>
+</section>
+
+<section class="receipts">
+  <h2>Receipts</h2>
+  <p class="sub">Every number on this page is recomputed in your browser from the sieve and compared with the committed Python twin (<code>receipts/product_edge_receipts.py</code>). The ten zero heights are Odlyzko's, and each is <em>verified here</em> by |ζ(½ + iγ)| ≈ 0 from the alternating series — a control height that is not a zero must fail that test.</p>
+  <table><thead><tr><th>quantity</th><th>computed here</th><th>Python twin</th><th></th></tr></thead><tbody id="rtab"></tbody></table>
+  <div id="selfcheck"></div>
+</section>
+
+<section class="sources">
+  <h2>Sources</h2>
+  <ul>
+    <li>L. Euler, <i>Variae observationes circa series infinitas</i> (presented 1737, published 1744; Eneström 72) — the product over the primes.</li>
+    <li>H. von Koch, <i>Sur la distribution des nombres premiers</i>, Acta Math. 24 (1901) 159–182 — RH ⟹ ψ(x) − x = O(√x·log² x).</li>
+    <li>A. E. Ingham, <i>The Distribution of Prime Numbers</i>, Cambridge Tracts 30 (1932), Chapter V — Θ and the two-way link between the error term and the zero-free region; H. L. Montgomery and R. C. Vaughan, <i>Multiplicative Number Theory I</i> (Cambridge, 2007) for the modern account.</li>
+    <li>S. M. Gonek, C. P. Hughes and J. P. Keating, <i>A hybrid Euler–Hadamard product for the Riemann zeta function</i>, Duke Math. J. 136 (2007) 507–549 — ζ as the truncated prime product times the truncated zero product; neither alone.</li>
+    <li>D. Platt and T. Trudgian, <i>The Riemann hypothesis is true up to 3·10¹²</i>, Bull. London Math. Soc. 53 (2021) 792–797.</li>
+    <li>A. M. Odlyzko, <a href="https://www-users.cse.umn.edu/~odlyzko/zeta_tables/" target="_blank" rel="noopener noreferrer">tables of zeros of the Riemann zeta function</a> — the ten heights used here, each re-verified on this page.</li>
+    <li>The companion rooms: <a href="https://fractalyouniverse.org/Angle_atlas/">The Angle Atlas</a> (Room VII, whose fence this page sharpens) and <a href="https://fractalyouniverse.org/Bergen_disc/">The Bergen Disc</a> (Room VI).</li>
+  </ul>
+</section>
+
+<footer>
+  <span class="lg" style="background:var(--gold)"></span>Fractal Youniverse · <a href="https://fractalyouniverse.org/">all instruments</a> · Travis Bergen · built 2026-09-10 with the Riemann agent · source and Python twin: <a href="https://github.com/travisbergen2/Product_edge" target="_blank" rel="noopener noreferrer">github.com/travisbergen2/Product_edge</a><br>
+  No tracking, no analytics; the only external request is the font stylesheet. Instruments, not proofs.
+</footer>
+
+</div>
+<script>
+(function(){
+  var N = 1000000;
+  var G = [14.134725141734693, 21.022039638771555, 25.010857580145688, 30.424876125859513, 32.935061587739189,
+           37.586178158825671, 40.918719012147495, 43.327073280914999, 48.005150881167159, 49.773832477672302];
+  // Python twin values (product_edge_receipts.py, 2026-09-10), at printed precision
+  var PY = {
+    s2_err_1e6: -1.11e-7,
+    p_g1: [0.2147, 0.1152, 0.0611, 0.0228, 0.0131, 0.3204, 0.4174],
+    p_g2: [0.2695, 0.1738, 0.1026, 0.0432, 0.0455, 0.3619, 1.3877],
+    CK: [10, 100, 1000, 10000, 100000, 300000, 1000000],
+    comp: {"0.9": -1.1680, "0.75": -1.1991, "0.6": -1.3111, "0.5": -1.6333, "0.4": -2.8705},
+    zeros_max_abs: 3.27e-8, control_abs: 0.7199
+  };
+  var status = document.getElementById('status');
+
+  // ---------- sieve: primes and Lambda to N ----------
+  var t0 = performance.now();
+  var comp = new Uint8Array(N + 1); var primes = [];
+  for (var i = 2; i <= N; i++) { if (!comp[i]) { primes.push(i); if (i * i <= N) for (var j = i * i; j <= N; j += i) comp[j] = 1; } }
+  var Lam = new Float64Array(N + 1);
+  for (var k = 0; k < primes.length; k++) { var p = primes[k], lp = Math.log(p); for (var q = p; q <= N; q *= p) Lam[q] = lp; }
+  var logn = new Float64Array(N + 1); for (var n = 1; n <= N; n++) logn[n] = Math.log(n);
+
+  // ---------- helpers ----------
+  function zetaEta(sr, si, M) { // pair-averaged alternating series
+    var re = 0, im = 0, pre = 0, pim = 0;
+    for (var n = 1; n <= M + 1; n++) {
+      var a = Math.exp(-sr * logn[n]), ph = -si * logn[n], sgn = (n % 2) ? 1 : -1;
+      pre = re; pim = im; re += sgn * a * Math.cos(ph); im += sgn * a * Math.sin(ph);
+    }
+    var er = 0.5 * (re + pre), ei = 0.5 * (im + pim);
+    // divide by (1 - 2^{1-s})
+    var b = Math.exp((1 - sr) * Math.LN2), br = 1 - b * Math.cos(-si * Math.LN2), bi = -b * Math.sin(-si * Math.LN2);
+    var d = br * br + bi * bi; return { re: (er * br + ei * bi) / d, im: (ei * br - er * bi) / d };
+  }
+  function absc(z) { return Math.hypot(z.re, z.im); }
+  // running Euler product along the primes at s = sr + i si; returns arrays (log10 p, log|P|, arg P) at every prime
+  function eulerTrace(sr, si) {
+    var lx = new Float64Array(primes.length), lp = new Float64Array(primes.length), ar = new Float64Array(primes.length);
+    var L = 0, A = 0;
+    for (var k = 0; k < primes.length; k++) {
+      var p = primes[k], m = Math.exp(-sr * Math.log(p)), ph = -si * Math.log(p);
+      var fr = 1 - m * Math.cos(ph), fi = -m * Math.sin(ph);           // 1 - p^{-s}
+      L -= Math.log(Math.hypot(fr, fi)); A -= Math.atan2(fi, fr);       // log|1/(1-p^{-s})|, arg
+      lx[k] = Math.log10(p); lp[k] = L; ar[k] = A;
+    }
+    return { lx: lx, lp: lp, ar: ar };
+  }
+  function mainTerm(sr, si, X) { // Re[ X^{1-s} / ((1-s) log X) ]
+    var a = 1 - sr, b = -si, lX = Math.log(X);
+    var mr = Math.exp(a * lX) * Math.cos(b * lX), mi = Math.exp(a * lX) * Math.sin(b * lX);
+    var dr = a * lX, di = b * lX, d = dr * dr + di * di;
+    return (mr * dr + mi * di) / d;
+  }
+  function atP(trace, P) { var k = 0; while (k + 1 < primes.length && primes[k + 1] <= P) k++; return { logabs: trace.lp[k], arg: trace.ar[k] }; }
+
+  // ---------- canvas plotting ----------
+  function plot(canvas, series, o) {
+    var dpr = window.devicePixelRatio || 1, W = canvas.clientWidth || 900, H = Math.round(W * (o.aspect || 0.42));
+    canvas.width = W * dpr; canvas.height = H * dpr; canvas.style.height = H + 'px';
+    var c = canvas.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.fillStyle = '#0e1420'; c.fillRect(0, 0, W, H);
+    var m = { l: 58, r: 16, t: 16, b: 40 }, pw = W - m.l - m.r, ph = H - m.t - m.b;
+    var xmin = o.xmin, xmax = o.xmax, ymin = o.ymin, ymax = o.ymax;
+    var X = function (x) { return m.l + (x - xmin) / (xmax - xmin) * pw; }, Y = function (y) { return m.t + (ymax - y) / (ymax - ymin) * ph; };
+    c.strokeStyle = '#26304a'; c.lineWidth = 1; c.font = '11px IBM Plex Mono, monospace'; c.fillStyle = '#6b7a8c'; c.textAlign = 'center';
+    for (var xt = Math.ceil(xmin); xt <= xmax; xt++) { c.beginPath(); c.moveTo(X(xt), m.t); c.lineTo(X(xt), m.t + ph); c.stroke(); c.fillText('10' + sup(xt), X(xt), H - 14); }
+    var ny = 5, step = niceStep((ymax - ymin) / ny); c.textAlign = 'right';
+    for (var yt = Math.ceil(ymin / step) * step; yt <= ymax + 1e-9; yt += step) { c.beginPath(); c.moveTo(m.l, Y(yt)); c.lineTo(m.l + pw, Y(yt)); c.stroke(); c.fillText(fmt(yt), m.l - 6, Y(yt) + 4); }
+    if (o.zero) { c.strokeStyle = '#3a475c'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(m.l, Y(0)); c.lineTo(m.l + pw, Y(0)); c.stroke(); }
+    if (o.vline != null) { c.strokeStyle = '#3a475c'; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(X(o.vline), m.t); c.lineTo(X(o.vline), m.t + ph); c.stroke(); c.setLineDash([]); }
+    series.forEach(function (s) {
+      c.strokeStyle = s.color; c.lineWidth = s.width || 1.8; c.setLineDash(s.dash || []); c.beginPath(); var started = false;
+      for (var i = 0; i < s.x.length; i++) { var y = s.y[i]; if (!isFinite(y)) { started = false; continue; } var px = X(s.x[i]), py = Y(Math.max(ymin, Math.min(ymax, y))); if (!started) { c.moveTo(px, py); started = true; } else c.lineTo(px, py); }
+      c.stroke(); c.setLineDash([]);
+    });
+    c.fillStyle = '#9fb0c3'; c.textAlign = 'center'; c.font = '11.5px Inter, sans-serif'; c.fillText(o.xlabel, m.l + pw / 2, H - 2);
+    c.save(); c.translate(14, m.t + ph / 2); c.rotate(-Math.PI / 2); c.fillText(o.ylabel, 0, 0); c.restore();
+    var ly = m.t + 8; c.textAlign = 'left'; c.font = '11px IBM Plex Mono, monospace';
+    series.forEach(function (s) { if (!s.label) return; c.strokeStyle = s.color; c.lineWidth = 2.2; c.setLineDash(s.dash || []); c.beginPath(); c.moveTo(m.l + pw - 170, ly + 5); c.lineTo(m.l + pw - 150, ly + 5); c.stroke(); c.setLineDash([]); c.fillStyle = '#e6edf3'; c.fillText(s.label, m.l + pw - 144, ly + 9); ly += 16; });
+  }
+  function sup(n) { var map = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' }; return String(n).split('').map(function (ch) { return map[ch] || ch; }).join(''); }
+  function niceStep(r) { var p = Math.pow(10, Math.floor(Math.log10(r))), f = r / p; return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p; }
+  function fmt(v) { return Math.abs(v) >= 100 ? v.toFixed(0) : Math.abs(v) >= 10 ? v.toFixed(1) : v.toFixed(2); }
+  function sample(arr, n) { var out = [], step = Math.max(1, Math.floor(arr.length / n)); for (var i = 0; i < arr.length; i += step) out.push(arr[i]); if (out[out.length - 1] !== arr[arr.length - 1]) out.push(arr[arr.length - 1]); return out; }
+
+  // ---------- panel 1: s = 2 ----------
+  var tr2 = eulerTrace(2, 0), PI26 = Math.PI * Math.PI / 6;
+  var e1x = [], e1y = []; (function () { var idx = sample(Array.from(tr2.lx.keys()), 700); idx.forEach(function (k) { var v = Math.exp(tr2.lp[k]); e1x.push(tr2.lx[k]); e1y.push(Math.log10(Math.abs(v - PI26))); }); })();
+  var s2err = Math.exp(tr2.lp[primes.length - 1]) - PI26;
+  function draw1() { plot(document.getElementById('c1'), [{ x: e1x, y: e1y, color: '#5b9bea', label: 'log₁₀ |P_X(2) − π²/6|' }], { xmin: 0.3, xmax: 6, ymin: -7.5, ymax: 0, xlabel: 'primes up to X', ylabel: 'log₁₀ error', aspect: 0.4 }); }
+  document.getElementById('r1').innerHTML = 'at X = 10⁶ (78,498 primes): P_X(2) − π²/6 = <b>' + s2err.toExponential(2) + '</b> · π²/6 = ' + PI26.toFixed(6);
+
+  // ---------- panel 2: the line ----------
+  var traces = {}, cur = 0, heights = G.concat([15.0]);
+  function tr(idx) { if (!traces[idx]) traces[idx] = eulerTrace(0.5, heights[idx]); return traces[idx]; }
+  var pick = document.getElementById('pick');
+  heights.forEach(function (g, idx) { var b = document.createElement('button'); b.textContent = idx < 10 ? 'γ' + sub(idx + 1) + ' = ' + g.toFixed(3) : 't = 15 (not a zero)'; b.addEventListener('click', function () { cur = idx; draw2(); }); pick.appendChild(b); });
+  function sub(n) { var map = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉' }; return String(n).split('').map(function (ch) { return map[ch]; }).join(''); }
+  var zcache = {};
+  function draw2() {
+    Array.prototype.forEach.call(pick.children, function (b, i) { b.classList.toggle('on', i === cur); });
+    var t = heights[cur], T = tr(cur), idx = sample(Array.from(T.lx.keys()), 900), xs = [], ys = [], ms = [];
+    idx.forEach(function (k) { xs.push(T.lx[k]); ys.push(T.lp[k]); ms.push(mainTerm(0.5, t, primes[k])); });
+    var lo = Math.min.apply(null, ys.concat(ms)), hi = Math.max.apply(null, ys.concat(ms));
+    plot(document.getElementById('c2'), [{ x: xs, y: ys, color: '#b58cf5', label: 'log |P_X(½ + it)|' }, { x: xs, y: ms, color: '#e8c47a', dash: [6, 4], width: 1.4, label: 'main term Re[X^{1−s}/((1−s) log X)]' }],
+      { xmin: 0.3, xmax: 6, ymin: Math.floor(lo) - 0.5, ymax: Math.ceil(hi) + 0.5, xlabel: 'primes up to X', ylabel: 'natural log', zero: true, aspect: 0.42 });
+    if (!zcache[cur]) zcache[cur] = absc(zetaEta(0.5, t, 200000));
+    var a6 = atP(T, 1e6), a5 = atP(T, 1e5);
+    document.getElementById('r2').innerHTML = 'height t = <b>' + t.toFixed(6) + '</b> · |ζ(½ + it)| from the alternating series = <b>' + zcache[cur].toExponential(2) + '</b>' + (cur < 10 ? ' (a zero)' : ' (not a zero)') +
+      ' · |P_X| at X = 10⁵: <b>' + Math.exp(a5.logabs).toFixed(4) + '</b>, at 10⁶: <b>' + Math.exp(a6.logabs).toFixed(4) + '</b> · swing over the plotted range: ×' + Math.exp(hi - lo).toExponential(1);
+  }
+
+  // ---------- panel 3: compensated series ----------
+  var SIG = [0.9, 0.75, 0.6, 0.5, 0.4], COL = ['#5b9bea', '#3fbfae', '#6fdc9a', '#f7a03a', '#ff5c5c'];
+  var xsamp = []; for (var e = 0.3; e <= 6.0001; e += 0.01) xsamp.push(Math.round(Math.pow(10, e))); xsamp = xsamp.filter(function (v, i, a) { return v >= 2 && v <= N && (i === 0 || v !== a[i - 1]); });
+  var compSeries = [], compAt1e6 = {};
+  SIG.forEach(function (sg, si) {
+    var sum = -1.0, ys = [], next = 0, n = 2;
+    for (var xi = 0; xi < xsamp.length; xi++) { var target = xsamp[xi]; for (; n <= target; n++) sum += (Lam[n] - 1) * Math.exp(-sg * logn[n]); ys.push(sum); }
+    compAt1e6[String(sg)] = sum; compSeries.push({ x: xsamp.map(function (v) { return Math.log10(v); }), y: ys, color: COL[si], label: 's = ' + sg, width: sg === 0.5 ? 2.4 : 1.8 });
+  });
+  function draw3() { plot(document.getElementById('c3'), compSeries, { xmin: 0.3, xmax: 6, ymin: -3.2, ymax: -0.4, xlabel: 'terms up to x', ylabel: 'Σ (Λ(n) − 1) n^{−s}', aspect: 0.42 }); }
+  document.getElementById('r3').innerHTML = 'partial sums at x = 10⁶: ' + SIG.map(function (sg) { return 's = ' + sg + ' → <b>' + compAt1e6[String(sg)].toFixed(4) + '</b>'; }).join(' · ');
+
+  // ---------- receipts ----------
+  var rows = [], pass = 0;
+  function row(name, here, py, tol) { var ok = Math.abs(here - py) <= tol; if (ok) pass++; rows.push([name, here, py, ok]); }
+  row('P_X(2) − π²/6 at X = 10⁶', s2err, PY.s2_err_1e6, 5e-9);
+  var T1 = tr(0), T2 = tr(1);
+  PY.CK.forEach(function (P, i) { row('|P_X(½ + iγ₁)| at X = ' + P, Math.exp(atP(T1, P).logabs), PY.p_g1[i], 1e-3); });
+  PY.CK.forEach(function (P, i) { row('|P_X(½ + iγ₂)| at X = ' + P, Math.exp(atP(T2, P).logabs), PY.p_g2[i], 1e-3); });
+  SIG.forEach(function (sg) { row('Σ(Λ(n)−1)n^{−s} to 10⁶, s = ' + sg, compAt1e6[String(sg)], PY.comp[String(sg)], 1e-3); });
+  var zmax = 0; G.forEach(function (g, i) { var a = absc(zetaEta(0.5, g, 200000)); zmax = Math.max(zmax, a); });
+  row('max |ζ(½ + iγ_k)|, k = 1..10 (must be ≈ 0)', zmax, 0, 1e-5);
+  row('control |ζ(½ + 15i)| (must NOT be ≈ 0)', absc(zetaEta(0.5, 15, 200000)), PY.control_abs, 1e-3);
+  var tb = document.getElementById('rtab');
+  rows.forEach(function (r) { var trr = document.createElement('tr'); trr.innerHTML = '<td>' + r[0] + '</td><td>' + fmtv(r[1]) + '</td><td>' + fmtv(r[2]) + '</td><td class="' + (r[3] ? 'pass' : 'fail') + '">' + (r[3] ? '✓' : '✗') + '</td>'; tb.appendChild(trr); });
+  function fmtv(v) { return Math.abs(v) < 1e-3 && v !== 0 ? v.toExponential(2) : v.toFixed(4); }
+  document.getElementById('selfcheck').innerHTML = '<span class="' + (pass === rows.length ? 'pass' : 'fail') + '">' + pass + ' / ' + rows.length + ' recomputed values agree with the Python twin</span> · sieve to 10⁶ = ' + primes.length + ' primes · ψ(10⁶) − 10⁶ = ' + (Array.prototype.reduce.call(Lam, function (a, b) { return a + b; }, 0) - N).toFixed(1);
+  window.__productEdge = { pass: pass, total: rows.length, primes: primes.length, s2err: s2err, zmax: zmax };
+
+  function drawAll() { draw1(); draw2(); draw3(); }
+  drawAll();
+  var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(drawAll, 150); });
+  status.textContent = 'computed in ' + ((performance.now() - t0) / 1000).toFixed(1) + ' s · ' + primes.length + ' primes below one million · all curves are finite windows';
+})();
+</script>
+</body>
+</html>
